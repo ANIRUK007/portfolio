@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowDown, Download, Mail } from 'lucide-react';
 import { personalInfo } from '../../data/mock';
 import './HeroSection.css';
+import heroimg from '../assests/1000197111.jpg'
 
 const HeroSection = () => {
   const scrollToProjects = () => {
@@ -22,6 +23,7 @@ const HeroSection = () => {
             <h1 className="hero-name">{personalInfo.name}</h1>
             <h2 className="hero-tagline">{personalInfo.tagline}</h2>
             <p className="hero-bio">{personalInfo.bio}</p>
+            <br></br>
             <div className="hero-buttons">
               <button className="cta-button primary" onClick={scrollToProjects}>
                 VIEW PROJECTS
@@ -39,7 +41,7 @@ const HeroSection = () => {
         </div>
         <div className="hero-right">
           <div className="hero-image-container">
-            <img src={personalInfo.avatar} alt={personalInfo.name} className="hero-image" />
+            <img src={heroimg} alt={personalInfo.name} className="hero-image" />
           </div>
         </div>
       </div>

@@ -3,14 +3,14 @@
 export const personalInfo = {
   name: "ANIRUDH KOTLA",
   tagline: "FULLSTACK DEVELOPER & AI/ML ENTHUSIAST",
-  bio: "Computer Science Engineering student passionate about building intelligent systems and exploring the intersection of web technologies and artificial intelligence. Currently leading IEEE student chapter and working on cutting-edge projects in LLMs and sustainable AI.",
+  bio: "Computer Science Engineering student passionate about building intelligent systems and exploring the intersection of web technologies and artificial intelligence. Currently leading IEEE student branch and working on cutting-edge projects in LLMs and sustainable AI.",
   email: "kotlaanirudh05@gmail.com",
   phone: "+91 99666 91635",
   github: "ANIRUK007",
   linkedin: "kotla-anirudh",
-  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Anirudh",
+  avatar: "C:/Users/K Anirudh/Desktop/portfolio/frontend/src/components/assests/1000197111.jpg",
   available: true,
-  resumeLink: "#"
+  resumeLink: "frontend/src/components/assests/Resume 2025.01.04.pdf"
 };
 
 export const githubStats = {
@@ -24,7 +24,7 @@ export const githubStats = {
 export const spotifyData = {
   currentlyPlaying: "Coding Focus Mix",
   artist: "Lo-fi Beats",
-  playlistUrl: "https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ",
+  playlistUrl: "https://open.spotify.com/playlist/4ESXu1gGRVTOK1zHFJLtrr?si=ad7600eaec7e4bb7&pt=830bf1d727f4949030c33b34b00af24d",
   albumArt: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=400&fit=crop"
 };
 
