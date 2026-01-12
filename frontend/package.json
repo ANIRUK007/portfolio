@@ -1,5 +1,6 @@
 {
   "name": "frontend",
+  "homepage": "https://ANIRUK007.github.io/portfolio",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -56,6 +57,8 @@
     "zod": "^3.24.4"
   },
   "scripts": {
+    "predeploy": "yarn build",
+    "deploy": "gh-pages -d build",
     "start": "craco start",
     "build": "craco build",
     "test": "craco test"
