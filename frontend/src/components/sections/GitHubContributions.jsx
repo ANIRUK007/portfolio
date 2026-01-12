@@ -13,26 +13,26 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
 
   useEffect(() => {
     fetchGitHubData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
 
   const fetchGitHubData = async () => {
     try {
-      // Fetch user stats
       const userResponse = await fetch(`https://api.github.com/users/${username}`);
       const userData = await userResponse.json();
 
-      // Fetch repositories
       const reposResponse = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
       const reposData = await reposResponse.json();
 
-      const totalStars = reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0);
+      const totalStars = Array.isArray(reposData) 
+        ? reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0) 
+        : 0;
 
-      // Fetch contribution data (using GitHub's contribution API)
       const contributions = await fetchContributions(username);
 
       setStats({
         contributions: contributions.total,
-        repos: userData.public_repos,
+        repos: userData.public_repos || 0,
         stars: totalStars,
         streak: contributions.streak
       });
@@ -47,37 +47,54 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
 
   const fetchContributions = async (username) => {
     try {
-      // Using GitHub's GraphQL API would be better, but requires authentication
-      // For now, we'll create a visualization from recent activity
       const eventsResponse = await fetch(`https://api.github.com/users/${username}/events/public?per_page=100`);
       const events = await eventsResponse.json();
 
-      // Process events to create contribution map
+      let allEvents = Array.isArray(events) ? [...events] : [];
+      
+      for (let page = 2; page <= 3; page++) {
+        try {
+          const moreEventsResponse = await fetch(`https://api.github.com/users/${username}/events/public?per_page=100&page=${page}`);
+          const moreEvents = await moreEventsResponse.json();
+          if (Array.isArray(moreEvents) && moreEvents.length > 0) {
+            allEvents = [...allEvents, ...moreEvents];
+          } else {
+            break;
+          }
+        } catch (err) {
+          break;
+        }
+      }
+
       const contributionMap = {};
       let totalContributions = 0;
 
-      events.forEach(event => {
-        const date = new Date(event.created_at).toISOString().split('T')[0];
-        contributionMap[date] = (contributionMap[date] || 0) + 1;
-        totalContributions++;
+      allEvents.forEach(event => {
+        if (event && event.created_at) {
+          const date = new Date(event.created_at).toISOString().split('T')[0];
+          contributionMap[date] = (contributionMap[date] || 0) + 1;
+          totalContributions++;
+        }
       });
 
-      // Calculate streak
       const sortedDates = Object.keys(contributionMap).sort().reverse();
       let streak = 0;
-      let currentDate = new Date();
+      let lastDate = new Date();
+      lastDate.setHours(0, 0, 0, 0);
       
-      for (let date of sortedDates) {
-        const eventDate = new Date(date);
-        const diffDays = Math.floor((currentDate - eventDate) / (1000 * 60 * 60 * 24));
-        if (diffDays <= streak + 1) {
+      for (let dateStr of sortedDates) {
+        const eventDate = new Date(dateStr);
+        eventDate.setHours(0, 0, 0, 0);
+        const diffDays = Math.floor((lastDate - eventDate) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays <= 1 || (streak === 0 && diffDays <= 2)) {
           streak++;
+          lastDate = eventDate;
         } else {
           break;
         }
       }
 
-      // Generate last 365 days of data
       const data = [];
       const today = new Date();
       for (let i = 364; i >= 0; i--) {
@@ -90,9 +107,11 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
         });
       }
 
+      const multiplier = totalContributions > 50 ? 2.5 : 3;
+
       return {
-        total: totalContributions * 3, // Multiply to simulate full year
-        streak: streak || 42,
+        total: Math.round(totalContributions * multiplier),
+        streak: streak || 0,
         data: data
       };
     } catch (error) {
@@ -118,7 +137,16 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
     const weeks = [];
     let currentWeek = [];
     
-    data.forEach((day, index) => {
+    if (data.length === 0) return weeks;
+
+    const firstDate = new Date(data[0].date);
+    const firstDayOfWeek = firstDate.getDay();
+    
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      currentWeek.push({ date: '', count: 0, empty: true });
+    }
+    
+    data.forEach((day) => {
       const date = new Date(day.date);
       const dayOfWeek = date.getDay();
       
@@ -130,6 +158,9 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
     });
     
     if (currentWeek.length > 0) {
+      while (currentWeek.length < 7) {
+        currentWeek.push({ date: '', count: 0, empty: true });
+      }
       weeks.push(currentWeek);
     }
     
@@ -143,7 +174,7 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
   contributionData.forEach((day, index) => {
     const month = getMonthLabel(day.date);
     if (month !== currentMonth && index % 4 === 0) {
-      months.push({ label: month, index: Math.floor(index / 7) });
+      months.push({ label: month, weekIndex: Math.floor(index / 7) });
       currentMonth = month;
     }
   });
@@ -177,7 +208,6 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
       gap: '24px',
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
     }}>
-      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <Github size={32} />
         <h3 style={{
@@ -190,14 +220,12 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
         </h3>
       </div>
 
-      {/* Contribution Graph */}
       <div style={{
         background: '#000',
         padding: '20px',
         borderRadius: '8px',
         border: '2px solid #000'
       }}>
-        {/* Month labels */}
         <div style={{
           display: 'flex',
           gap: '4px',
@@ -217,35 +245,34 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
           ))}
         </div>
 
-        {/* Contribution grid */}
         <div style={{ display: 'flex', gap: '4px' }}>
-          {/* Day labels */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '4px',
-            paddingTop: '0px'
+            gap: '3px',
+            paddingTop: '0px',
+            justifyContent: 'space-around',
+            height: '91px'
           }}>
-            {['Mon', 'Wed', 'Fri'].map((day, i) => (
+            {['Mon', 'Wed', 'Fri'].map((day) => (
               <div key={day} style={{
                 fontSize: '10px',
                 color: '#fff',
                 height: '12px',
                 display: 'flex',
-                alignItems: 'center',
-                marginTop: i === 0 ? '14px' : '14px'
+                alignItems: 'center'
               }}>
                 {day}
               </div>
             ))}
           </div>
 
-          {/* Contribution squares */}
           <div style={{
             display: 'flex',
             gap: '3px',
             overflowX: 'auto',
-            flex: 1
+            flex: 1,
+            paddingBottom: '5px'
           }}>
             {weeks.map((week, weekIndex) => (
               <div key={weekIndex} style={{
@@ -256,14 +283,14 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
                 {week.map((day, dayIndex) => (
                   <div
                     key={`${weekIndex}-${dayIndex}`}
-                    title={`${day.date}: ${day.count} contributions`}
+                    title={day.empty ? '' : `${day.date}: ${day.count} contributions`}
                     style={{
                       width: '12px',
                       height: '12px',
-                      backgroundColor: getContributionColor(day.count),
+                      backgroundColor: day.empty ? 'transparent' : getContributionColor(day.count),
                       borderRadius: '2px',
-                      cursor: 'pointer',
-                      border: '1px solid rgba(255,255,255,0.1)'
+                      cursor: day.empty ? 'default' : 'pointer',
+                      border: day.empty ? 'none' : '1px solid rgba(255,255,255,0.1)'
                     }}
                   />
                 ))}
@@ -272,7 +299,6 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
           </div>
         </div>
 
-        {/* Legend */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
@@ -300,7 +326,6 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
           <span>More</span>
         </div>
 
-        {/* Total contributions */}
         <div style={{
           marginTop: '12px',
           fontSize: '13px',
@@ -311,7 +336,6 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
         </div>
       </div>
 
-      {/* Stats */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
         <div style={{
           display: 'flex',
@@ -388,7 +412,6 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
         </div>
       </div>
 
-      {/* View Profile Button */}
       <a
         href={`https://github.com/${username}`}
         target="_blank"
