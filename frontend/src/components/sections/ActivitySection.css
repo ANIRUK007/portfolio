@@ -50,8 +50,8 @@
 }
 
 .spotify-block {
-  background: #5B9FFF;
-  color: #FFF;
+  background: #FFF;
+  color: #000;
 }
 
 .block-header {
@@ -193,7 +193,7 @@
 
 .audio-visualizer .bar {
   width: 6px;
-  background: #FFF;
+  background: #000;
   border-radius: 2px;
   animation: visualizer 1s ease-in-out infinite;
 }
@@ -233,7 +233,7 @@
 }
 
 .spotify-block .block-link {
-  color: #5B9FFF;
+  color: #FFF;
 }
 
 .block-link:hover {
