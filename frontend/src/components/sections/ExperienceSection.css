@@ -1,0 +1,167 @@
+.experience-section {
+  background: #FFD600;
+}
+
+.experience-timeline {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.timeline-item {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 24px;
+  position: relative;
+}
+
+.timeline-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.timeline-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 4px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.timeline-line {
+  width: 4px;
+  flex: 1;
+  background: #000;
+  min-height: 60px;
+}
+
+.experience-card {
+  padding: 28px;
+  border-radius: 8px;
+  border: 4px solid #000;
+  box-shadow: 12px 12px 0 #000;
+  transition: all 0.3s;
+  color: #000;
+}
+
+.experience-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 16px 16px 0 #000;
+}
+
+.exp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.exp-icon {
+  width: 48px;
+  height: 48px;
+  background: #000;
+  color: #FFF;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.3);
+}
+
+.exp-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 1;
+}
+
+.exp-type {
+  background: #000;
+  color: #FFF;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.exp-duration {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.exp-role {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+}
+
+.exp-organization {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  opacity: 0.9;
+}
+
+.exp-description {
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  opacity: 0.8;
+}
+
+.exp-achievements {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.achievement-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.achievement-bullet {
+  font-size: 18px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .timeline-item {
+    grid-template-columns: 40px 1fr;
+    gap: 16px;
+  }
+
+  .timeline-dot {
+    width: 24px;
+    height: 24px;
+  }
+
+  .experience-card {
+    padding: 20px;
+  }
+
+  .exp-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .exp-meta {
+    align-items: flex-start;
+  }
+}
