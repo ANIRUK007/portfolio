@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Github, GitBranch, Star, TrendingUp } from 'lucide-react';
+import './GitHubContributions.css';
 
 const GitHubContributions = ({ username = 'ANIRUK007' }) => {
   const [stats, setStats] = useState({
@@ -8,6 +9,7 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
     stars: 0,
     streak: 0
   });
+
   const [contributionData, setContributionData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,8 +26,8 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
       const reposResponse = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
       const reposData = await reposResponse.json();
 
-      const totalStars = Array.isArray(reposData) 
-        ? reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0) 
+      const totalStars = Array.isArray(reposData)
+        ? reposData.reduce((acc, repo) => acc + repo.stargazers_count, 0)
         : 0;
 
       const contributions = await fetchContributions(username);
@@ -51,17 +53,15 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
       const events = await eventsResponse.json();
 
       let allEvents = Array.isArray(events) ? [...events] : [];
-      
+
       for (let page = 2; page <= 3; page++) {
-        try {
-          const moreEventsResponse = await fetch(`https://api.github.com/users/${username}/events/public?per_page=100&page=${page}`);
-          const moreEvents = await moreEventsResponse.json();
-          if (Array.isArray(moreEvents) && moreEvents.length > 0) {
-            allEvents = [...allEvents, ...moreEvents];
-          } else {
-            break;
-          }
-        } catch (err) {
+        const moreEventsResponse = await fetch(
+          `https://api.github.com/users/${username}/events/public?per_page=100&page=${page}`
+        );
+        const moreEvents = await moreEventsResponse.json();
+        if (Array.isArray(moreEvents) && moreEvents.length > 0) {
+          allEvents = [...allEvents, ...moreEvents];
+        } else {
           break;
         }
       }
@@ -70,7 +70,7 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
       let totalContributions = 0;
 
       allEvents.forEach(event => {
-        if (event && event.created_at) {
+        if (event?.created_at) {
           const date = new Date(event.created_at).toISOString().split('T')[0];
           contributionMap[date] = (contributionMap[date] || 0) + 1;
           totalContributions++;
@@ -81,12 +81,12 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
       let streak = 0;
       let lastDate = new Date();
       lastDate.setHours(0, 0, 0, 0);
-      
+
       for (let dateStr of sortedDates) {
         const eventDate = new Date(dateStr);
         eventDate.setHours(0, 0, 0, 0);
         const diffDays = Math.floor((lastDate - eventDate) / (1000 * 60 * 60 * 24));
-        
+
         if (diffDays <= 1 || (streak === 0 && diffDays <= 2)) {
           streak++;
           lastDate = eventDate;
@@ -111,8 +111,8 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
 
       return {
         total: Math.round(totalContributions * multiplier),
-        streak: streak || 0,
-        data: data
+        streak,
+        data
       };
     } catch (error) {
       console.error('Error fetching contributions:', error);
@@ -128,317 +128,138 @@ const GitHubContributions = ({ username = 'ANIRUK007' }) => {
     return '#39d353';
   };
 
-  const getMonthLabel = (date) => {
-    const d = new Date(date);
-    return d.toLocaleDateString('en-US', { month: 'short' });
-  };
-
   const groupByWeeks = (data) => {
     const weeks = [];
     let currentWeek = [];
-    
-    if (data.length === 0) return weeks;
+
+    if (!data.length) return weeks;
 
     const firstDate = new Date(data[0].date);
     const firstDayOfWeek = firstDate.getDay();
-    
+
     for (let i = 0; i < firstDayOfWeek; i++) {
       currentWeek.push({ date: '', count: 0, empty: true });
     }
-    
+
     data.forEach((day) => {
       const date = new Date(day.date);
-      const dayOfWeek = date.getDay();
-      
-      if (dayOfWeek === 0 && currentWeek.length > 0) {
+      if (date.getDay() === 0 && currentWeek.length) {
         weeks.push([...currentWeek]);
         currentWeek = [];
       }
       currentWeek.push(day);
     });
-    
-    if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
-        currentWeek.push({ date: '', count: 0, empty: true });
-      }
-      weeks.push(currentWeek);
+
+    while (currentWeek.length < 7) {
+      currentWeek.push({ date: '', count: 0, empty: true });
     }
-    
+    weeks.push(currentWeek);
+
     return weeks;
   };
 
   const weeks = groupByWeeks(contributionData);
-  const months = [];
-  let currentMonth = '';
-  
-  contributionData.forEach((day, index) => {
-    const month = getMonthLabel(day.date);
-    if (month !== currentMonth && index % 4 === 0) {
-      months.push({ label: month, weekIndex: Math.floor(index / 7) });
-      currentMonth = month;
-    }
-  });
 
   if (loading) {
     return (
-      <div style={{
-        padding: '32px',
-        borderRadius: '8px',
-        border: '4px solid #000',
-        boxShadow: '12px 12px 0 #000',
-        background: '#FF6B35',
-        color: '#000',
-        textAlign: 'center'
-      }}>
-        <p style={{ margin: 0, fontWeight: 700 }}>Loading GitHub data...</p>
+      <div className="activity-block github-block">
+        <p className="loading-text">Loading GitHub data...</p>
       </div>
     );
   }
 
   return (
-    <div style={{
-      padding: '32px',
-      borderRadius: '8px',
-      border: '4px solid #000',
-      boxShadow: '12px 12px 0 #000',
-      background: '#FF6B35',
-      color: '#000',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '24px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <Github size={32} />
-        <h3 style={{
-          fontSize: '24px',
-          fontWeight: 900,
-          letterSpacing: '1.5px',
-          margin: 0
-        }}>
-          GITHUB CONTRIBUTIONS
-        </h3>
+    <div className="activity-block github-block">
+
+      <div className="github-header">
+        <Github className="github-icon" />
+        <h3 className="github-title">GITHUB ACTIVITY</h3>
       </div>
 
-      <div style={{
-        background: '#000',
-        padding: '20px',
-        borderRadius: '8px',
-        border: '2px solid #000'
-      }}>
-        <div style={{
-          display: 'flex',
-          gap: '4px',
-          marginBottom: '8px',
-          paddingLeft: '30px'
-        }}>
-          {months.map((month, i) => (
-            <div key={i} style={{
-              fontSize: '11px',
-              color: '#fff',
-              fontWeight: 600,
-              width: `${100 / months.length}%`,
-              textAlign: 'left'
-            }}>
-              {month.label}
-            </div>
-          ))}
-        </div>
+      {/* 🖥 Desktop only — hidden on phones via CSS */}
+      <div className="contribution-graph-container">
+        <div className="contribution-grid-wrapper">
 
-        <div style={{ display: 'flex', gap: '4px' }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '3px',
-            paddingTop: '0px',
-            justifyContent: 'space-around',
-            height: '91px'
-          }}>
-            {['Mon', 'Wed', 'Fri'].map((day) => (
-              <div key={day} style={{
-                fontSize: '10px',
-                color: '#fff',
-                height: '12px',
-                display: 'flex',
-                alignItems: 'center'
-              }}>
-                {day}
-              </div>
+          <div className="day-labels">
+            {['Mon', 'Wed', 'Fri'].map(day => (
+              <div key={day} className="day-label">{day}</div>
             ))}
           </div>
 
-          <div style={{
-            display: 'flex',
-            gap: '3px',
-            overflowX: 'auto',
-            flex: 1,
-            paddingBottom: '5px'
-          }}>
-            {weeks.map((week, weekIndex) => (
-              <div key={weekIndex} style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '3px'
-              }}>
-                {week.map((day, dayIndex) => (
+          <div className="contribution-grid">
+            {weeks.map((week, wi) => (
+              <div key={wi} className="week-column">
+                {week.map((day, di) => (
                   <div
-                    key={`${weekIndex}-${dayIndex}`}
+                    key={`${wi}-${di}`}
+                    className={`contribution-square ${day.empty ? 'empty' : ''}`}
                     title={day.empty ? '' : `${day.date}: ${day.count} contributions`}
-                    style={{
-                      width: '12px',
-                      height: '12px',
-                      backgroundColor: day.empty ? 'transparent' : getContributionColor(day.count),
-                      borderRadius: '2px',
-                      cursor: day.empty ? 'default' : 'pointer',
-                      border: day.empty ? 'none' : '1px solid rgba(255,255,255,0.1)'
-                    }}
+                    style={{ backgroundColor: day.empty ? 'transparent' : getContributionColor(day.count) }}
                   />
                 ))}
               </div>
             ))}
           </div>
+
         </div>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: '8px',
-          marginTop: '12px',
-          fontSize: '11px',
-          color: '#fff'
-        }}>
+        <div className="contribution-legend">
           <span>Less</span>
-          <div style={{ display: 'flex', gap: '3px' }}>
+          <div className="legend-squares">
             {[0, 1, 3, 5, 7].map(count => (
               <div
                 key={count}
-                style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: getContributionColor(count),
-                  borderRadius: '2px',
-                  border: '1px solid rgba(255,255,255,0.1)'
-                }}
+                className="legend-square"
+                style={{ backgroundColor: getContributionColor(count) }}
               />
             ))}
           </div>
           <span>More</span>
         </div>
 
-        <div style={{
-          marginTop: '12px',
-          fontSize: '13px',
-          color: '#fff',
-          fontWeight: 600
-        }}>
+        <div className="contribution-total">
           {stats.contributions} contributions in the last year
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          background: 'rgba(0, 0, 0, 0.1)',
-          padding: '12px',
-          borderRadius: '4px',
-          border: '2px solid #000'
-        }}>
-          <TrendingUp size={24} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '32px', fontWeight: 900, lineHeight: 1 }}>
-              {stats.contributions}
-            </span>
-            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '1px', opacity: 0.8 }}>
-              CONTRIBUTIONS
-            </span>
+      {/* ✅ Always visible (desktop + mobile) */}
+      <div className="stats-grid">
+
+        <div className="stat-box">
+          <TrendingUp className="stat-icon" />
+          <div className="stat-info">
+            <span className="stat-number">{stats.contributions}</span>
+            <span className="stat-label">CONTRIBUTIONS</span>
           </div>
         </div>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          background: 'rgba(0, 0, 0, 0.1)',
-          padding: '12px',
-          borderRadius: '4px',
-          border: '2px solid #000'
-        }}>
-          <GitBranch size={24} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '32px', fontWeight: 900, lineHeight: 1 }}>
-              {stats.repos}
-            </span>
-            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '1px', opacity: 0.8 }}>
-              REPOSITORIES
-            </span>
+        <div className="stat-box">
+          <GitBranch className="stat-icon" />
+          <div className="stat-info">
+            <span className="stat-number">{stats.repos}</span>
+            <span className="stat-label">REPOSITORIES</span>
           </div>
         </div>
 
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '16px',
-          background: 'rgba(0, 0, 0, 0.1)',
-          padding: '12px',
-          borderRadius: '4px',
-          border: '2px solid #000'
-        }}>
-          <Star size={24} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontSize: '32px', fontWeight: 900, lineHeight: 1 }}>
-              {stats.stars}
-            </span>
-            <span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '1px', opacity: 0.8 }}>
-              STARS EARNED
-            </span>
+        <div className="stat-box">
+          <Star className="stat-icon" />
+          <div className="stat-info">
+            <span className="stat-number">{stats.stars}</span>
+            <span className="stat-label">STARS EARNED</span>
           </div>
         </div>
 
-        <div style={{
-          background: '#000',
-          color: '#FF6B35',
-          padding: '12px 20px',
-          borderRadius: '4px',
-          fontWeight: 900,
-          fontSize: '16px',
-          letterSpacing: '1.5px',
-          textAlign: 'center',
-          boxShadow: '4px 4px 0 rgba(0, 0, 0, 0.3)'
-        }}>
+        <div className="streak-box">
           {stats.streak} DAY STREAK 🔥
         </div>
+
       </div>
 
       <a
         href={`https://github.com/${username}`}
         target="_blank"
         rel="noopener noreferrer"
-        style={{
-          background: '#000',
-          color: '#FF6B35',
-          padding: '12px 20px',
-          borderRadius: '4px',
-          fontWeight: 700,
-          fontSize: '14px',
-          letterSpacing: '1.5px',
-          textAlign: 'center',
-          textDecoration: 'none',
-          border: '4px solid #000',
-          boxShadow: '4px 4px 0 rgba(0, 0, 0, 0.3)',
-          cursor: 'pointer',
-          transition: 'all 0.2s'
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.transform = 'translateY(-2px)';
-          e.target.style.boxShadow = '6px 6px 0 rgba(0, 0, 0, 0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.transform = 'translateY(0)';
-          e.target.style.boxShadow = '4px 4px 0 rgba(0, 0, 0, 0.3)';
-        }}
+        className="github-link"
       >
         VIEW PROFILE →
       </a>

@@ -4,7 +4,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding-top: 100px;
+  padding: 120px 20px 80px;
   position: relative;
   background: #FFD600;
 }
@@ -14,7 +14,9 @@
   grid-template-columns: 1fr 1fr;
   gap: 60px;
   width: 100%;
+  max-width: 1200px;
   align-items: center;
+  margin: 0 auto;
 }
 
 .hero-left {
@@ -206,6 +208,7 @@
   cursor: pointer;
   opacity: 0.8;
   transition: opacity 0.3s;
+  z-index: 15;
 }
 
 .scroll-indicator:hover {
@@ -232,38 +235,146 @@
   }
 }
 
+/* Tablet */
 @media (max-width: 1024px) {
+  .hero-section {
+    padding: 100px 20px 60px;
+  }
+
   .hero-content {
     grid-template-columns: 1fr;
     gap: 40px;
+    text-align: center;
+  }
+
+  .hero-left {
+    align-items: center;
   }
 
   .hero-right {
     order: -1;
   }
 
+  .hero-bio {
+    margin: 0 auto;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+
   .hero-image-container {
-    width: 300px;
-    height: 300px;
+    width: 320px;
+    height: 320px;
+  }
+
+  .scroll-indicator {
+    bottom: 30px;
   }
 }
 
+/* Mobile */
 @media (max-width: 768px) {
   .hero-section {
-    padding-top: 80px;
+    padding: 100px 16px 80px;
+    min-height: calc(100vh - 60px);
+  }
+
+  .hero-content {
+    gap: 32px;
+  }
+
+  .hero-left {
+    gap: 24px;
+  }
+
+  .hero-name {
+    font-size: clamp(32px, 8vw, 48px);
+  }
+
+  .hero-tagline {
+    font-size: clamp(16px, 4vw, 20px);
+  }
+
+  .hero-bio {
+    font-size: 16px;
   }
 
   .hero-buttons {
     flex-direction: column;
+    width: 100%;
+    gap: 12px;
   }
 
   .cta-button {
     width: 100%;
     justify-content: center;
+    font-size: 13px;
+    padding: 12px 24px;
   }
 
   .hero-image-container {
-    width: 250px;
-    height: 250px;
+    width: 260px;
+    height: 260px;
+    box-shadow: 12px 12px 0 #000;
+  }
+
+  .hero-image-container:hover {
+    transform: translateY(-4px) rotate(-2deg);
+    box-shadow: 14px 14px 0 #000;
+  }
+
+  .scroll-indicator {
+    bottom: 20px;
+  }
+
+  .scroll-indicator span {
+    font-size: 10px;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    padding: 6px 14px;
+  }
+}
+
+/* Small Mobile */
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 90px 12px 70px;
+  }
+
+  .hero-content {
+    gap: 28px;
+  }
+
+  .hero-image-container {
+    width: 220px;
+    height: 220px;
+    padding: 16px;
+    box-shadow: 10px 10px 0 #000;
+  }
+
+  .hero-name {
+    font-size: clamp(28px, 9vw, 40px);
+    letter-spacing: 1px;
+  }
+
+  .hero-tagline {
+    font-size: clamp(14px, 5vw, 18px);
+  }
+
+  .hero-bio {
+    font-size: 15px;
+  }
+
+  .cta-button {
+    font-size: 12px;
+    padding: 12px 20px;
+    min-height: 46px;
+  }
+
+  .scroll-indicator {
+    bottom: 16px;
   }
 }
